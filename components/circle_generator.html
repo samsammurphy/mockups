@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Map Box</title>
+	<meta name="viewport" content="initial-scale=1.0">
+	<meta charset="utf-8">
+	<script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
+	<link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    
+        #map {
+            height: calc(100vh - 50px);
+            width: 100vw;
+        }
+    
+        #map-title {
+            height: 50px;
+            width: 100vw;
+            margin: 0;
+            text-align: center;
+        }
+    </style>
+
+</head>
+
+<body>
+	<h1 id='map-title'>Property Portfolio</h1>
+	<div id='map'></div>
+	<script>
+
+        var createGeoJSONCircle = function (center, radiusInKm, points) {
+                if (!points) points = 64;
+
+                var coords = {
+                    latitude: center[1],
+                    longitude: center[0]
+                };
+
+                var km = radiusInKm;
+
+                var ret = [];
+                var distanceX = km / (111.320 * Math.cos(coords.latitude * Math.PI / 180));
+                var distanceY = km / 110.574;
+
+                var theta, x, y;
+                for (var i = 0; i < points; i++) {
+                    theta = (i / points) * (2 * Math.PI);
+                    x = distanceX * Math.cos(theta);
+                    y = distanceY * Math.sin(theta);
+
+                    ret.push([coords.longitude + x, coords.latitude + y]);
+                }
+                ret.push(ret[0]);
+
+                return {
+                    "type": "geojson",
+                    "data": {
+                        "type": "FeatureCollection",
+                        "features": [{
+                            "type": "Feature",
+                            "geometry": {
+                                "type": "Polygon",
+                                "coordinates": [ret]
+                            }
+                        }]
+                    }
+                };
+            };
+
+        var addCircleToMap = function(id, geoJsonCircle){
+
+            map.addSource(id, geoJsonCircle, 0.5);
+
+            map.addLayer({
+                "id": id,
+                "type": "fill",
+                "source": id,
+                "layout": {},
+                "paint": {
+                    "fill-color": "red",
+                    "fill-opacity": 0.6
+                }
+            });
+        }
+
+		mapboxgl.accessToken = 'pk.eyJ1IjoibWF0dG1vdG9raSIsImEiOiJjamJoYWNzOTAzZmlnMzJtcmFycTc0N3c3In0.Ez51Ontgcm9m8ZHHElpv1Q';
+		
+        var map = new mapboxgl.Map({
+			container: 'map',
+			style: 'mapbox://styles/mapbox/outdoors-v10',
+			center: [- 93.6248586, 41.58527859],
+			zoom: 10
+		});
+
+        map.on('load', function () {
+
+            var circle = createGeoJSONCircle([-93.6248586, 41.58527859], 10)
+            
+            
+            addCircleToMap("circle", circle)
+
+
+            
+        });
+        
+    
+    </script>
+</body>
+
+</html>
