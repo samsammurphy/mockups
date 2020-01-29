@@ -44,6 +44,7 @@
         };
 
         var km = radiusInKm;
+        var area = Math.round(km * km * 3.14159 * 100) //in hectres
 
         var ret = [];
         var distanceX = km / (111.320 * Math.cos(coords.latitude * Math.PI / 180));
@@ -68,7 +69,8 @@
                     "geometry": {
                         "type": "Polygon",
                         "coordinates": [ret]
-                    }
+                    },
+                    "properties":{'area':area}
                 }]
             }
         };
@@ -88,6 +90,34 @@
                 "fill-color": "red",
                 "fill-opacity": 0.6
             }
+        });
+
+
+        // event listeners
+        map.on('click', id, function(e) {
+
+            let messageOnClick = `
+            <b>Wildfire loss report</b>
+
+            <p>cost (US $): 3,141,592 </p>
+            <p>buildings destroyed: : 42</p>
+            <p>burned (ha): ${e.features[0].properties.area}</p>
+
+        `
+            new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(messageOnClick)
+            .addTo(map);
+        });
+
+        // Change the cursor to a pointer when the mouse is over the states layer.
+        map.on('mouseenter', id, function() {
+        map.getCanvas().style.cursor = 'pointer';
+        });
+        
+        // Change it back to a pointer when it leaves.
+        map.on('mouseleave', id, function() {
+        map.getCanvas().style.cursor = '';
         });
 
         /*
